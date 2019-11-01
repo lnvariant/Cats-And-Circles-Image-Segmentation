@@ -1,0 +1,5 @@
+https://drive.google.com/open?id=1d3RpB0h8BSVuuvMKEtbtHrQI32TIQvq7
+
+Weights can be loaded by running:
+
+model = load_model(MAIN_DIR_PATH + "/NAME_OF_WEIGHTS_FILE.hdf5")

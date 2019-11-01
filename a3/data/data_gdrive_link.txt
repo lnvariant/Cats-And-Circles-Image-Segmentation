@@ -1,0 +1,3 @@
+https://drive.google.com/open?id=1AlBiu16-SbGMS3nfhzOg7Ht6MfNr6ucZ
+
+Download the folders (cat_data & horse_data) and copy them into this folder.
