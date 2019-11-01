@@ -70,15 +70,16 @@ def visualize_segmentations_with_contours(images, ground_masks, pred_masks, save
 
         # Apply cv2.threshold() to get a binary image
         _, thresh = cv2.threshold(p_mask, 50, 255, cv2.THRESH_BINARY)
+        img = images[i].copy()
+
         _, contours, _ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
-        img = images[i].copy()
         for contour in contours:
-            cv2.drawContours(img, contour, -1, (0, 255, 0), 1)
+            cv2.drawContours(img, contour, -1, (0, 255, 0), 2)
 
         figure = plt.figure(figsize=(10, 10))
-        plt.subplot(231), plt.imshow(p_mask)
-        plt.subplot(222), plt.imshow(img)
+        plt.subplot(231), plt.imshow(images[i].squeeze())
+        plt.subplot(222), plt.imshow(img.squeeze())
 
         #dice_index = dice_coef_np(ground_masks[i].squeeze(), p_mask)
         #plt.title("Dice Index: " + str(dice_index))
