@@ -72,45 +72,22 @@ def visualize_segmentations_with_contours(images, ground_masks, pred_masks, save
         _, thresh = cv2.threshold(p_mask, 50, 255, cv2.THRESH_BINARY)
         img = images[i].copy()
 
-        _, contours, _ = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        # detect circles in the image
+        circles = cv2.HoughCircles(thresh, method=cv2.HOUGH_GRADIENT, dp=1, minDist=thresh.shape[0]/2, param1=10, param2=8)
 
-        for contour in contours:
-            cv2.drawContours(img, contour, -1, (0, 255, 0), 2)
+        # Ensure at least some circles were found
+        if circles is not None:
+            # Convert the (x, y) coordinates and radius of the circles to integers
+            circles = np.round(circles[0, :]).astype("int")
+
+            # Loop over the (x, y) coordinates and radius of the circles
+            for (x, y, r) in circles:
+                # Draw the circle in the output image
+                cv2.circle(img, (x, y), r, (0, 255, 0), 2)
 
         figure = plt.figure(figsize=(10, 10))
         plt.subplot(231), plt.imshow(images[i].squeeze())
         plt.subplot(222), plt.imshow(img.squeeze())
-
-        #dice_index = dice_coef_np(ground_masks[i].squeeze(), p_mask)
-        #plt.title("Dice Index: " + str(dice_index))
-
-        plt.show()
-        if save_path is not None or save_path != "":
-            figure.savefig(save_path + "/result_" + str(i) + ".png", dpi=100, bbox_inches='tight')
-
-
-def visualize_segmentations(images, ground_masks, pred_masks, save_path=""):
-    """
-    Visualizes the predicted masks by drawing the images, ground truth masks, and predicted masks separately in
-    a single figure.
-
-    :param images: the list of images
-    :param ground_masks: the list of ground truth masks for the image
-    :param pred_masks: the list of predicted masks for the image
-    :param save_path: path to save all the images (if empty, then images won't be saved)
-    """
-    for i in range(len(pred_masks)):
-        p_mask = pred_masks[i].squeeze()
-        p_mask[p_mask >= 0.5] = 1
-        p_mask[p_mask < 0.5] = 0
-
-        figure = plt.figure(figsize=(10, 10))
-        plt.subplot(231), plt.imshow(images[i].squeeze())
-        plt.subplot(232), plt.imshow(ground_masks[i].squeeze())
-        plt.subplot(233), plt.imshow(p_mask)
-
-        #dice_index = dice_coef_np(ground_masks[i].squeeze(), p_mask)
-        #plt.title("Dice Index: " + str(dice_index))
 
         plt.show()
         if save_path is not None or save_path != "":
@@ -182,7 +159,7 @@ def train_model(train_x, train_y, model_name="circle_model", augment=False, lr=1
     """
     if model is None:
         model = circle_model((IMG_WIDTH, IMG_HEIGHT, 1))
-        model.compile(optimizer=Adam(lr=lr), loss="mean_squared_error", metrics=["accuracy"])
+        model.compile(optimizer=Adam(lr=lr), loss="binary_crossentropy", metrics=["accuracy"])
 
     # Setup training callbacks
     callbacks = []
@@ -196,4 +173,3 @@ def train_model(train_x, train_y, model_name="circle_model", augment=False, lr=1
     plot_model_history(history)
 
     return model, history
-
